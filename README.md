@@ -88,6 +88,45 @@ The part of the code that performs this crop, conversion to bit image and resize
 ## Model - 2 (Detect and Identify characters)
 Post detection of the license plate the intention was to locate the characters in the license plate and then identify those characters. Unlike simple object classification such as distinguishing cats from dogs, identifying the characters on the license plate is a challenging task, as there were many other characters on the plate, but our intention was only to identify the legitimate characters on the plate. For character identification task we did a separate type of preprocessing. These cropped images were used with customised VGG16 architecture initially to classify the character images and the results have been analysed. Identification of the characters was one of the important tasks to be performed on the images.
 
+## Architecture Used
+### Experiment - 1 (Using VGG16 Architecture)
 
+The first architecture used on the classifying the characters was VGG16 architecture. Our intention here was to train the model on individual characters which included alphabets (A-Z) and number (0-9) which added up to 34 classes in total and then use the model to classify or identify the characters in the image.
 
+### Experimental Settings
+The base model VGG16 is taken as the reference architecture and is further customised for the image classification task. The customised architecture consists of 4 blocks of convolutions layers. Similar to the base architecture, 150 x 150 RGB images are passed through 4 blocks of convolution layers and each block consists of 3 x 3 filters. Each block of convolution is followed by a max pooling layer with a stride of 2, furthermore, customisation is added by adding a dropout layer at the end of each convolution block. The images are flattened and then the input is given to the fully connected (FC) layers. The final layer is the given 34 output neurons with the activation function used is ‘softmax’. As 4 blocks of the convolution layer is used for the customised architecture and the top four layers were frozen and the total number of trainable and non-trainable parameters achieved are as follows:
 
+```python
+Total Params: 22,380,834
+Trainable Params: 21,937,954
+Non-trainable Params: 442,880
+```
+The experiment was performed with both RMSprop and Adam optimisers and have plotted the graphs for accuracy/loss vs iterations respectively. As the dataset consists of several classes the loss used in this experiment is ‘categorical_crossentropy’. The activation function used is ‘relu’ and padding used is ‘same’. Rectified Linear Unit (ReLU) is the most used activation function it is one of the important activation functions as it does not saturate, and it also avoids the problem of gradient vanishing. The total number of epochs given was 100.
+
+### Results
+As the training accuracy and the total loss was very good as showcased in the below figure but the model did not perform on the test set the example below
+![image](https://user-images.githubusercontent.com/30070656/91629738-e0317200-ea0e-11ea-9ebf-096cf50032f6.png)
+
+Below is an example of the classifications of the characters done using the VGG16 architecture
+![image](https://user-images.githubusercontent.com/30070656/91629778-31d9fc80-ea0f-11ea-8f64-3dd63b28ccb9.png)
+
+### Experiment - 1 (Using standard Faster RCNN)
+As observed in the above experiment the model did not appropriately identify the images in a license plate as shown in the figure 5.1 , with this we had to change the model and make use of the standard Faster RCNN model to identify the characters in the image. Changing the model and also changes the train and test dataset images, the images cropped from model 1 were then decided to be changed to bitmap images and then use Faster RCNN to identify each character. 
+Following the pre-processing done to prepare the train and test dataset:
+
+```python
+def crop_images(self,img_path,output_dict):
+	inx = list(output_dict['detection_scores']).index(max(output_dict['detection_scores']))
+	bounding_box = output_dict['detection_boxes'][inx]
+	image_save_to = path_to_cropped_images +"/"+ img_path.split("/")[-1]
+	image_sel = cv2.imread(img_path,cv2.IMREAD_GRAYSCALE)
+	height,width = image_sel.shape
+	y1=int(bounding_box[0]*height)
+	x1=int(bounding_box[1]*width)
+	y2=int(bounding_box[2]*height)
+	x2=int(bounding_box[3]*width)
+	new_img = cv2.resize(image_sel[y1:y2,x1:x2],(200,90))
+	(thresh, im_bw) = cv2.threshold(new_img, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+	cv2.imwrite(image_save_to,im_bw)
+	return image_save_to;
+```
