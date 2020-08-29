@@ -53,3 +53,34 @@ Experimental Settings for Faster-RCNN:
       'batch_size': 8
       }
 ```
+with num_steps = 1200 and num_eval_steps = 16;
+Results: With this configuration and training Faster-RCNN gave us quite clear result. The images from the experiments are as follows:
+![image](https://user-images.githubusercontent.com/30070656/91629191-20422600-ea0a-11ea-9dbe-79de453a8b03.png)
+
+with this model the average precision and average recall received are as follows:
+![image](https://user-images.githubusercontent.com/30070656/91629205-3a7c0400-ea0a-11ea-9c95-f5e4d9767fcb.png)
+
+As we received better results from faster-RCNN we used the model for our first phase to detect the license plate. For the second phase of work, only that license plate is the area of our interest, so instead of processing all the images, we cropped the images only including our area of interest and planned to proceed with that. As we can see (images given below) the section of the number plate is not clear so to decrease the noise we converted the images to bitmap, thus the image will include either 0 or 1(255) no intermediate pixel value. In addition to that, the area of our interest (the license plate) is in the image varied in size, so we resized the cropped image to 200*90.
+
+![image](https://user-images.githubusercontent.com/30070656/91629245-a494a900-ea0a-11ea-8edb-d48e2842ba98.png)
+
+The output of Model 1: While predicting the number plate if the predicting image(on left) is as follows then the output from model one to feed to model2 will be the image on right
+![image](https://user-images.githubusercontent.com/30070656/91629298-13720200-ea0b-11ea-91fc-ccd81677bd7c.png)
+
+The part of the code that performs this crop, conversion to bit image and resizes it is given below:
+```python
+	def crop_images(self,img_path,output_dict):
+		inx = list(output_dict['detection_scores']).index(max(output_dict['detection_scores']))
+		bounding_box = output_dict['detection_boxes'][inx]
+		image_save_to = path_to_cropped_images +"/"+ img_path.split("/")[-1]
+		image_sel = cv2.imread(img_path,cv2.IMREAD_GRAYSCALE)
+		height,width = image_sel.shape
+		y1=int(bounding_box[0]*height)
+		x1=int(bounding_box[1]*width)
+		y2=int(bounding_box[2]*height)
+		x2=int(bounding_box[3]*width)
+		new_img = cv2.resize(image_sel[y1:y2,x1:x2],(200,90))
+		(thresh, im_bw) = cv2.threshold(new_img, 128, 255, cv2.THRESH_BINARY | cv2.THRESH_OTSU)
+		cv2.imwrite(image_save_to,im_bw)
+		return image_save_to;
+```
