@@ -84,3 +84,10 @@ The part of the code that performs this crop, conversion to bit image and resize
 		cv2.imwrite(image_save_to,im_bw)
 		return image_save_to;
 ```
+
+## Model - 2 (Detect and Identify characters)
+Post detection of the license plate the intention was to locate the characters in the license plate and then identify those characters. Unlike simple object classification such as distinguishing cats from dogs, identifying the characters on the license plate is a challenging task, as there were many other characters on the plate, but our intention was only to identify the legitimate characters on the plate. For character identification task we did a separate type of preprocessing. These cropped images were used with customised VGG16 architecture initially to classify the character images and the results have been analysed. Identification of the characters was one of the important tasks to be performed on the images.
+
+
+
+
