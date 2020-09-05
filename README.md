@@ -131,3 +131,29 @@ def crop_images(self,img_path,output_dict):
 	cv2.imwrite(image_save_to,im_bw)
 	return image_save_to;
 ```
+### Pre-Processing
+As our model 1 results gave the cropped license plate bitmap images, we had to prepare a different data set that included these cropped bitmap license plate images which can be fed into our new model for the character identification. Following are the steps included in the preparation and pre-processing of the dataset:
+Step 1: Cropping the actual images just to the license plates
+Step2: Resizing all the cropped images to a size of 200 x 90
+Step 3: Converting these cropped and re-sized images to bitmap images, some of the image
+
+![image](https://user-images.githubusercontent.com/30070656/92298481-a4595800-ef8c-11ea-8275-049ebfe58918.png)
+
+Step 4: Performing the character-wise annotations on the pre-processed images
+Step 5: Splitting the entire dataset into train and test with 80% and 20% respectively and then creating .pbtxt files for the train and test images After completing the pre-processing, the train and test data were fed to our model in the below step for character classification.
+
+### Experimental Settings:
+Object detection task the model Faster-RCNN has some of the defined hyperparameters such as the number of steps provided are 2000, the number of evaluation steps is 50 and the config model is selected as ‘faster_rcnn_inception_v2’. The batch size selected for this model is 8.
+![image](https://user-images.githubusercontent.com/30070656/92298600-15e5d600-ef8e-11ea-9e24-b7b4e234aad9.png)
+
+### Results:
+Results obtained with this configuration was as follows
+![image](https://user-images.githubusercontent.com/30070656/92298605-2f871d80-ef8e-11ea-9d97-124098ec2829.png)
+
+As observed in the above figure the model performed well and detected all the characters correctly on the license plate. There were some challenges faced in getting these bounding boxes and identifying the characters in the images. As the standard architecture only accepted RGB images to generate the bounding boxes we specifically converted the bitmap images to RGB get the bounding boxes. Now after detecting the characters with the help of bounding boxes our main intention was to print these characters and show the exact number printed on the license plate. Our model generated around 300 bounding boxes for each image, so we only selected those bounding boxes where the threshold was greater than 0.5. Bounding boxes with the threshold value greater than 0.5 gave us all the characters in that image in an unsorted format. As we have the values for the coordinates we sorted the characters based on the coordinates in ascending order. Following is an example of a number plate and sorting out the characters in the correct sequence
+
+![image](https://user-images.githubusercontent.com/30070656/92298621-66f5ca00-ef8e-11ea-9ec7-f7543daefaca.png)
+![image](https://user-images.githubusercontent.com/30070656/92298629-76751300-ef8e-11ea-9f7a-c509ec6b2e7f.png)
+
+### Conclusion:
+As observed from the above results the Faster RCNN had better and accurate results as compared with the customized VGG16 architecture. Characters were more detected, and the accuracy was also good in the detection of each character. Initially, the loss and the accuracy on the training set for the VGG16 architecture was considerably high but it miserably failed to predict the other characters where Faster RCNN only with standard setting outperformed the VGG16 architecture.
