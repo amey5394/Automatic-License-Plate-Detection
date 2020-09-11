@@ -1,4 +1,3 @@
-# Automatic License Plate Detection 
 ## Object detection and Image classification problem
 
 License plate systems play an important role in multiple fields such as for automatic toll payment, wherein the car will be automatically identified via its license plate to carry out a payment in an automated environment. Parking fee payment and traffic surveillance are some other examples which heavily relies on License plate numbers. The automated nature of license plate systems makes it a viable and cost-effective method to be implemented.
